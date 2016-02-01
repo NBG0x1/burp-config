@@ -1,11 +1,14 @@
 package net.ahri.burpconfig.params;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ConfigConsumer implements Params.Consumer
 {
     private final Params.Platform platform;
     private final ConfigReadWriter configReadWriter;
 
-    private String configFilename;
+    private List<String> configFilenames = new ArrayList<String>();
 
     public ConfigConsumer(Params.Platform platform, ConfigReadWriter configReadWriter)
     {
@@ -16,22 +19,17 @@ public class ConfigConsumer implements Params.Consumer
     @Override
     public int consume(int i, String[] args)
     {
-        if (configFilename != null)
-        {
-            throw new Params.ParamException("config file can only be specified once");
-        }
-
         if (Params.isOutOfBounds(i, args))
         {
             throw new Params.ParamException("expected config file");
         }
 
-        configFilename = args[i];
-
-        if (!platform.exists(configFilename))
+        if (!platform.exists(args[i]))
         {
             throw new Params.ParamException(args[i] + " does not exist");
         }
+
+        configFilenames.add(args[i]);
 
         return 1;
     }
@@ -39,24 +37,31 @@ public class ConfigConsumer implements Params.Consumer
     @Override
     public String getDescription()
     {
-        return "writes config stored in a file to Burp prefs";
+        return "writes config stored in a file to Burp prefs, can be called multiple times";
     }
 
     public void write()
     {
-        final ConfigReadWriter.LineReader lineReader = configReadWriter.read(configFilename);
-
-        while (true)
+        if (configFilenames == null)
         {
-            final String line = lineReader.readLine();
-            if (line == null)
-            {
-                break;
-            }
-
-            configReadWriter.write(parseLine(line));
+            return;
         }
 
+        for (String configFilename : configFilenames)
+        {
+            final ConfigReadWriter.LineReader lineReader = configReadWriter.read(configFilename);
+
+            while (true)
+            {
+                final String line = lineReader.readLine();
+                if (line == null)
+                {
+                    break;
+                }
+
+                configReadWriter.write(parseLine(line));
+            }
+        }
     }
 
     private static ConfigReadWriter.Pair parseLine(String line) throws ParseException

@@ -31,7 +31,7 @@ Now run Burp, and configure to your liking, then close it back down again. We
 can now diff against the defaults.
 
 ```sh
-java -jar burp-config.jar -dump | diff defaults - | awk '/^>/ { sub(/^> /, ""); print; }'
+java -jar burp-config.jar -dump | diff defaults - | awk '/^>/ { sub(/^> /, ""); print; }' | grep -v '^extender.availablebapps'
 ```
 
 Use these to write your own config file, which can then be loaded with:

@@ -1,5 +1,6 @@
 package net.ahri.burpconfig.params;
 
+import net.ahri.burpconfig.KvpWriter;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -9,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 
 public class ParamsExtensionTest
 {
-    private static final ExtensionConsumer.ExtensionWriter NULL_EXTENSION_WRITER = new ExtensionConsumer.ExtensionWriter()
+    private static final KvpWriter NULL_EXTENSION_WRITER = new KvpWriter()
     {
         @Override
         public void write(String key, String value)
@@ -77,7 +78,7 @@ public class ParamsExtensionTest
         assertEquals("PGVjPjx0PgAAAAABPC90PjxmPgMAAAAIL2Zvby5qYXI8L2Y+PG4+AwAAAAdmb28uamFyPC9uPjxvbz4AAAAAADwvb28+PGVvPgAAAAAAPC9lbz48bD4CATwvbD48Yj4CADwvYj48L2VjPg==", extensionWriter.output.get("suite.extension0"));
     }
 
-    private static class MapExtensionWriter implements ExtensionConsumer.ExtensionWriter
+    private static class MapExtensionWriter implements KvpWriter
     {
         public final Map<String, String> output = new HashMap<String, String>();
 

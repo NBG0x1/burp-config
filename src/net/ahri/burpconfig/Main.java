@@ -5,6 +5,8 @@ import net.ahri.burpconfig.params.ConfigConsumer;
 import net.ahri.burpconfig.params.DumpConsumer;
 import net.ahri.burpconfig.params.ExtensionConsumer;
 import net.ahri.burpconfig.params.Params;
+import net.ahri.burpconfig.params.ScopeExcludeConsumer;
+import net.ahri.burpconfig.params.ScopeIncludeConsumer;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -41,7 +43,15 @@ public class Main
 
         final ExtensionConsumer extensionConsumer = new ExtensionConsumer(
                 platform,
-                new ExtensionPrefsWriter(prefs)
+                new PrefsWriter(prefs)
+        );
+
+        final ScopeIncludeConsumer scopeIncludeConsumer = new ScopeIncludeConsumer(
+                new PrefsWriter(prefs)
+        );
+
+        final ScopeExcludeConsumer scopeExcludeConsumer = new ScopeExcludeConsumer(
+                new PrefsWriter(prefs)
         );
 
         final DumpConsumer dumpConsumer = new DumpConsumer(prefs);
@@ -49,12 +59,14 @@ public class Main
 
         map.put("-c", configConsumer);
         map.put("-e", extensionConsumer);
+        map.put("-i", scopeIncludeConsumer);
+        map.put("-x", scopeExcludeConsumer);
         map.put("-dump", dumpConsumer);
         map.put("-clear", clearConsumer);
 
         if (args.length == 0)
         {
-            System.err.println("USAGE:");
+            System.err.println("Usage:");
             for (Map.Entry<String, Params.Consumer> entry : map.entrySet())
             {
                 System.err.printf("    %s: %s\n", entry.getKey(), entry.getValue().getDescription());
@@ -78,15 +90,17 @@ public class Main
 
         configConsumer.write();
         extensionConsumer.writeExtensions();
+        scopeIncludeConsumer.writeScopes();
+        scopeExcludeConsumer.writeScopes();
     }
 
     private static class ConfigReadFileWritePrefs implements ConfigConsumer.ConfigReadWriter
     {
-        private final Preferences prefs;
+        private final PrefsWriter writer;
 
         public ConfigReadFileWritePrefs(Preferences prefs)
         {
-            this.prefs = prefs;
+            this.writer = new PrefsWriter(prefs);
         }
 
         @Override
@@ -121,15 +135,15 @@ public class Main
         @Override
         public void write(Pair pair)
         {
-            prefs.put(pair.key, pair.value);
+            writer.write(pair.key, pair.value);
         }
     }
 
-    private static class ExtensionPrefsWriter implements ExtensionConsumer.ExtensionWriter
+    private static class PrefsWriter implements KvpWriter
     {
         private final Preferences prefs;
 
-        public ExtensionPrefsWriter(Preferences prefs)
+        public PrefsWriter(Preferences prefs)
         {
             this.prefs = prefs;
         }

@@ -1,5 +1,6 @@
 package net.ahri.burpconfig.params;
 
+import net.ahri.burpconfig.KvpWriter;
 import sun.misc.BASE64Encoder;
 
 import java.io.DataOutputStream;
@@ -13,12 +14,12 @@ public class ExtensionConsumer implements Params.Consumer
 {
     private final List<String> files = new ArrayList<String>();
     private final Params.Platform platform;
-    private final ExtensionWriter extensionWriter;
+    private final KvpWriter extensionWriter;
 
-    public ExtensionConsumer(Params.Platform platform, ExtensionWriter extensionWriter)
+    public ExtensionConsumer(Params.Platform platform, KvpWriter kvpWriter)
     {
         this.platform = platform;
-        this.extensionWriter = extensionWriter;
+        this.extensionWriter = kvpWriter;
     }
 
     @Override
@@ -42,7 +43,7 @@ public class ExtensionConsumer implements Params.Consumer
     @Override
     public String getDescription()
     {
-        return "configures Burp to load the given extension, can be called multiple times";
+        return "load the given extension, can be called multiple times";
     }
 
     public void writeExtensions()
@@ -57,11 +58,6 @@ public class ExtensionConsumer implements Params.Consumer
             {
             }
         }
-    }
-
-    public interface ExtensionWriter
-    {
-        void write(String key, String value);
     }
 
     public static class ExtensionConfig
